@@ -25,6 +25,8 @@ export default tseslint.config(
 			'**/.github',
 			'**/.nyc_output',
 			'**/vite.config.mts',
+			'coverage',
+			'reports',
 			'eslint.config.mjs',
 			'test/testImport.mjs',
 			'test/testRequire.cjs',
