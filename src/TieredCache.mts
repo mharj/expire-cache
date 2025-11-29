@@ -64,12 +64,12 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 
 	/**
 	 * Get cache entry from cache
-	 * @param key - cache key
-	 * @param tier - cache tier
-	 * @param timeout - optional update to new timeout for cache entry (if not provided, default timeout for tier will be used)
+	 * @param {Key} key - cache key
+	 * @param {T['tier']} tier - cache tier
+	 * @param {TimeoutEnum} [timeout] - optional update to new timeout for cache entry (if not provided, default timeout for tier will be used)
 	 * @returns - promise that resolves when cache entry is set
 	 */
-	public async get<T extends Tiers[number]>(key: Key, tier: T['tier'], timeout?: TimeoutEnum): Promise<Promise<T['data'] | undefined> | T['data'] | undefined> {
+	public async get<T extends Tiers[number]>(key: Key, tier: T['tier'], timeout?: TimeoutEnum): Promise<T['data'] | undefined> {
 		this.logger.logKey('get', `MultiTierCache ${this.cacheName} get: '${String(key)}' tier: ${tier}`);
 		const entry = this.cache.get(key);
 		const value = await this.handleCacheEntry(key, tier, entry);
@@ -82,10 +82,10 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 
 	/**
 	 * Set cache entry
-	 * @param key - cache key
-	 * @param tier - cache tier
-	 * @param data - cache data
-	 * @param timeout - optional timeout for cache entry. Else timeout will be checked from handleTimeoutValue or default timeout for tier.
+	 * @param {Key} key - cache key
+	 * @param {T['tier']} tier - cache tier
+	 * @param {T['data']} data - cache data
+	 * @param {TimeoutEnum} [timeout] - optional timeout for cache entry. Else timeout will be checked from handleTimeoutValue or default timeout for tier.
 	 */
 	public async set<T extends Tiers[number]>(key: Key, tier: T['tier'], data: T['data'], timeout?: TimeoutEnum): Promise<void> {
 		this.logger.logKey('set', `MultiTierCache ${this.cacheName} set: '${String(key)}' tier: ${tier}`);
@@ -96,9 +96,9 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 
 	/**
 	 * Set multiple cache entries
-	 * @param tier - cache tier
-	 * @param entries - iterable of key, data pairs
-	 * @param timeout - optional timeout for cache entry. Else timeout will be checked from handleTimeoutValue or default timeout for tier.
+	 * @param {T['tier']} tier - cache tier
+	 * @param {Iterable<[Key, T['data']]>} entries - iterable of key, data pairs
+	 * @param {TimeoutEnum} [timeout] - optional timeout for cache entry. Else timeout will be checked from handleTimeoutValue or default timeout for tier.
 	 */
 	public async setEntries<T extends Tiers[number]>(tier: T['tier'], entries: Iterable<[Key, T['data']]>, timeout?: TimeoutEnum): Promise<void> {
 		const entriesArray = Array.from(entries);
@@ -115,6 +115,8 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 
 	/**
 	 * Get tier type for current key
+	 * @param {Key} key - cache key
+	 * @returns {Tiers[number]['tier'] | undefined} The tier type or undefined if not found
 	 */
 	public getTier(key: Key): Tiers[number]['tier'] | undefined {
 		const entry = this.cache.get(key);
@@ -123,7 +125,8 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 
 	/**
 	 * Iterate this.cache values and use handleCacheEntry to get data
-	 * @param tier
+	 * @param {Tiers[number]['tier']} tier - cache tier to get values for
+	 * @returns {AsyncIterable<Tiers[number]['data']>} Async iterable of cache values
 	 */
 	public tierValues(tier: Tiers[number]['tier']): AsyncIterable<Tiers[number]['data']> {
 		const iterator = this.cache.entries();
@@ -143,6 +146,11 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 		};
 	}
 
+	/**
+	 * Iterate this.cache entries and use handleCacheEntry to get data
+	 * @param {Tiers[number]['tier']} tier - cache tier to get entries for
+	 * @returns {AsyncIterable<[Key, Tiers[number]['data']]>} Async iterable of key-value pairs
+	 */
 	public tierEntries(tier: Tiers[number]['tier']): AsyncIterable<[Key, Tiers[number]['data']]> {
 		const iterator = this.cache.entries();
 		const currentTierResolve = this.handleCacheEntry.bind(this);
@@ -232,10 +240,10 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 
 	/**
 	 * Internal helper to set cache entry and set timeout
-	 * @param key - cache entry key
-	 * @param tier - cache entry tier
-	 * @param data - cache entry data
-	 * @param timeout - timeout value, optional
+	 * @param {Key} key - cache entry key
+	 * @param {T['tier']} tier - cache entry tier
+	 * @param {T['data']} data - cache entry data
+	 * @param {TimeoutEnum} [timeout] - timeout value, optional
 	 */
 	protected async handleSetValue<T extends Tiers[number]>(key: Key, tier: T['tier'], data: T['data'], timeout?: TimeoutEnum) {
 		this.cache.set(key, {tier, data});
@@ -244,7 +252,7 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 
 	/**
 	 * Internal helper to delete cache entry and cancel its timeout
-	 * @param key - cache entry key
+	 * @param {Key} key - cache entry key
 	 * @returns true if entry was deleted, false if not found
 	 */
 	protected handleDeleteValue(key: Key): boolean {

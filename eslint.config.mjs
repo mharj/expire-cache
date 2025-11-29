@@ -1,6 +1,6 @@
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import stylisticTs from '@stylistic/eslint-plugin-ts';
+import stylistic from '@stylistic/eslint-plugin';
 import importPlugin from 'eslint-plugin-import';
 import prettierRecommended from 'eslint-plugin-prettier/recommended';
 import sonarjs from 'eslint-plugin-sonarjs';
@@ -32,7 +32,7 @@ export default tseslint.config(
 	},
 	{
 		plugins: {
-			'@stylistic/ts': stylisticTs,
+			'@stylistic/ts': stylistic,
 		},
 		languageOptions: {
 			parser: tsParser,
@@ -160,14 +160,21 @@ export default tseslint.config(
 			'@typescript-eslint/prefer-optional-chain': 'warn',
 			'sonarjs/no-commented-code': 'warn', // to keep codebase clean
 			'sonarjs/deprecation': 'warn', // to keep codebase clean
-
+			'sonarjs/deprecation': 'off',
+			'@typescript-eslint/no-deprecated': 'off',
+			'jsdoc/no-types': 'off',
+			'jsdoc/require-param-type': 'warn',
+			'@typescript-eslint/no-redundant-type-constituents': 'off',
 		},
 	},
 	{
-		files: ['**/*.test.mts'],
+		files: ['./test/**/*.mts'],
 		rules: {
 			'@cspell/spellchecker': 'off',
 			'jsdoc/require-jsdoc': 'off',
+			'sonarjs/no-commented-code': 'off',
+			'jsdoc/require-param': 'off',
+			'jsdoc/require-returns': 'off',
 		},
 	},
 );
