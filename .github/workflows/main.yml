@@ -77,7 +77,7 @@ jobs:
         uses: qltysh/qlty-action/coverage@v2
         with:
           oidc: true
-          files: reports/jest-results.xml
+          files: coverage/lcov.info
 
       # npm publish when PR done
       - name: Publish ${{env.PACKAGE_NAME}} ${{env.PACKAGE_VERSION}}
