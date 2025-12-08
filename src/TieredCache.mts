@@ -305,10 +305,16 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 		}
 	}
 
+	/**
+	 * handle Cache Entry transformation to target tier output
+	 * @param key - cache entry key
+	 * @param targetTier - target tier
+	 * @param cacheEntry - current tier cache entry
+	 */
 	protected abstract handleCacheEntry<T extends Tiers[number]>(
 		key: Key,
-		tier: T['tier'],
-		cache: Tiers[number] | undefined,
+		targetTier: T['tier'],
+		cacheEntry: Tiers[number] | undefined,
 	): Promise<T['data'] | undefined> | T['data'] | undefined;
 	/**
 	 * this return new timeout value for cached entry based on tier (or undefined if tier doesn't have timeout)

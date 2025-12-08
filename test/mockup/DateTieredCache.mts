@@ -17,7 +17,7 @@ type DateTimeoutValue = (typeof DateTimeout)[keyof typeof DateTimeout];
 export class DateTieredCache extends TieredCache<DateCacheTiers, DateTimeoutValue, string> implements GetCacheTier<DateCacheTiers, string> {
 	public readonly cacheName = 'DateTieredCache';
 
-	public getModel(_key: string, cache: DataCacheTier) {
+	public getModel(_key: string, cache: DataCacheTier): Date {
 		switch (cache.tier) {
 			case 'model':
 				return cache.data;
@@ -28,7 +28,7 @@ export class DateTieredCache extends TieredCache<DateCacheTiers, DateTimeoutValu
 		}
 	}
 
-	public getStringValue(_key: string, cache: DataCacheTier) {
+	public getStringValue(_key: string, cache: DataCacheTier): string {
 		switch (cache.tier) {
 			case 'model':
 				return JSON.stringify({$cdate: cache.data.getTime()});
@@ -39,7 +39,7 @@ export class DateTieredCache extends TieredCache<DateCacheTiers, DateTimeoutValu
 		}
 	}
 
-	public getObject(_key: string, cache: DataCacheTier) {
+	public getObject(_key: string, cache: DataCacheTier): {$cdate: number} {
 		switch (cache.tier) {
 			case 'model':
 				return {$cdate: cache.data.getTime()};
@@ -50,21 +50,21 @@ export class DateTieredCache extends TieredCache<DateCacheTiers, DateTimeoutValu
 		}
 	}
 
-	protected handleCacheEntry<CT extends DataCacheTier>(key: string, tier: CT['tier'], cache: DataCacheTier | undefined): CT['data'] | undefined {
-		if (!cache) {
+	protected handleCacheEntry<CT extends DataCacheTier>(key: string, targetTier: CT['tier'], cacheEntry: DataCacheTier | undefined): CT['data'] | undefined {
+		if (!cacheEntry) {
 			// cache = {tier: 'model', data: new Date()}; // on database usage, we can lookup still with key and build new entry for cache here.
 			// this.handleSetValue(key, 'model', cache.data); // and also optionally set it here
 			return;
 		}
-		switch (tier) {
+		switch (targetTier) {
 			case 'model':
-				return this.getModel(key, cache);
+				return this.getModel(key, cacheEntry);
 			case 'object':
-				return this.getObject(key, cache);
+				return this.getObject(key, cacheEntry);
 			case 'stringValue':
-				return this.getStringValue(key, cache);
+				return this.getStringValue(key, cacheEntry);
 			default:
-				throw new Error(`Invalid tier ${String(tier)}`);
+				throw new Error(`Invalid tier ${String(targetTier)}`);
 		}
 	}
 
