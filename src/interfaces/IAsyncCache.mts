@@ -26,7 +26,7 @@ export interface IAsyncCache<Payload, Key = string> {
 	/**
 	 * Sets a value in the cache with an optional expiration date
 	 * @param key - The key to set the value for
-	 * @param data - The data to set in the cache
+	 * @param value - The data to set in the cache
 	 * @param expires - The optional expiration date for the cache entry
 	 * @returns {Promise<void>} Promise of void
 	 */

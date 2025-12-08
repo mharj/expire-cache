@@ -4,10 +4,14 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+
+permissions:
+    contents: read
+    id-token: write # IMPORTANT
+
 env:
   # Setting an environment variable with the value of a configuration variable
   PUBLISH_BRANCH: 'refs/heads/main'
-  CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   PACKAGE_NAME: 'unknown'
   PACKAGE_VERSION: 'unknown'
@@ -69,13 +73,11 @@ jobs:
       - name: Run and publish code coverage
         if: |
           github.ref == env.PUBLISH_BRANCH &&
-          env.CC_TEST_REPORTER_ID != '' &&
           env.HAVE_COVERAGE_SCRIPT == 'true'
-        uses: paambaati/codeclimate-action@v5.0.0
-        env:
-          CC_TEST_REPORTER_ID: ${{ env.CC_TEST_REPORTER_ID }}
+        uses: qltysh/qlty-action/coverage@v2
         with:
-          coverageCommand: ${{ env.NPM }} run coverage
+          oidc: true
+          files: coverage/lcov.info
 
       # npm publish when PR done
       - name: Publish ${{env.PACKAGE_NAME}} ${{env.PACKAGE_VERSION}}

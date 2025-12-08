@@ -2,9 +2,9 @@
 
 [![TypeScript](https://badges.frapsoft.com/typescript/code/typescript.svg?v=101)](https://github.com/ellerbrock/typescript-badges/)
 [![npm version](https://badge.fury.io/js/@avanio%2Fexpire-cache.svg)](https://badge.fury.io/js/@avanio%2Fexpire-cache)
-[![Maintainability](https://api.codeclimate.com/v1/badges/a35459a312c189018ad0/maintainability)](https://codeclimate.com/github/AvanioOy/expire-cache/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/a35459a312c189018ad0/test_coverage)](https://codeclimate.com/github/AvanioOy/expire-cache/test_coverage)
-![github action](https://github.com/AvanioOy/expire-cache/actions/workflows/main.yml/badge.svg?branch=main)
+[![Maintainability](https://qlty.sh/gh/mharj/projects/expire-cache/maintainability.svg)](https://qlty.sh/gh/mharj/projects/expire-cache)
+[![Code Coverage](https://qlty.sh/gh/mharj/projects/expire-cache/coverage.svg)](https://qlty.sh/gh/mharj/projects/expire-cache)
+![github action](https://github.com/mharj/expire-cache/actions/workflows/main.yml/badge.svg?branch=main)
 
 Typescript/Javascript cache interfaces and expiration cache class.
 

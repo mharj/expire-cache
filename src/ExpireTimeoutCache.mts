@@ -44,9 +44,9 @@ export class ExpireTimeoutCache<Payload, Key = string> extends EventEmitter<Cach
 	private defaultExpireMs: undefined | number;
 	/**
 	 * Creates a new instance of the ExpireTimeoutCache class
-	 * @param logger - The logger to use (optional)
-	 * @param logMapping - The log mapping to use (optional). Default is all logging disabled
-	 * @param defaultExpireMs - The default expiration time in milliseconds (optional)
+	 * @param {ILoggerLike} logger - The logger to use (optional)
+	 * @param {Partial<ExpireTimeoutCacheLogMapType>} logMapping - The log mapping to use (optional). Default is all logging disabled
+	 * @param {number} defaultExpireMs - The default expiration time in milliseconds (optional)
 	 */
 	constructor(logger?: ILoggerLike, logMapping?: Partial<ExpireTimeoutCacheLogMapType>, defaultExpireMs?: number) {
 		super();
@@ -120,7 +120,7 @@ export class ExpireTimeoutCache<Payload, Key = string> extends EventEmitter<Cach
 
 	/**
 	 * Set the default expiration time in milliseconds
-	 * @param expireMs - The default expiration time in milliseconds
+	 * @param {number} expireMs - The default expiration time in milliseconds
 	 */
 	public setExpireMs(expireMs: number | undefined) {
 		this.defaultExpireMs = expireMs;
