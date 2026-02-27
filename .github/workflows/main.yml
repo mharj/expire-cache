@@ -12,7 +12,6 @@ permissions:
 env:
   # Setting an environment variable with the value of a configuration variable
   PUBLISH_BRANCH: 'refs/heads/main'
-  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   PACKAGE_NAME: 'unknown'
   PACKAGE_VERSION: 'unknown'
   NPM: 'npm'
@@ -81,10 +80,7 @@ jobs:
 
       # npm publish when PR done
       - name: Publish ${{env.PACKAGE_NAME}} ${{env.PACKAGE_VERSION}}
-        run: ${{ env.NPM }} publish --no-git-checks --access public
+        run: npm publish --no-git-checks --access public
         if: |
-          github.ref == env.PUBLISH_BRANCH &&
-          env.NPM_TOKEN != '' &&
+          github.ref == 'refs/heads/main' &&
           env.PACKAGE_VERSION != env.NPM_VERSION
-        env:
-          NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}

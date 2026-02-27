@@ -1,4 +1,4 @@
-import {type IAsyncCache} from '@luolapeikko/cache-types';
+import type {IAsyncCache} from '@luolapeikko/cache-types';
 import {beforeAll, describe, expect, it} from 'vitest';
 import {iterAsArray} from './lib/iter.mjs';
 import {TestAsync} from './mockup/TestAsync.mjs';

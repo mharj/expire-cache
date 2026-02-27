@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {type GetCacheTier, TieredCache, type TierStatusInitialRecord, type TierType} from '../../src/index.mjs';
 
 type DateCacheTiers = [TierType<Date, 'model'>, TierType<{$cdate: number}, 'object'>, TierType<string, 'stringValue'>];
@@ -68,7 +65,7 @@ export class DateTieredCache extends TieredCache<DateCacheTiers, DateTimeoutValu
 		}
 	}
 
-	protected handleTimeoutValue<CT extends DateCacheTiers[number]>(key: string, tier: CT['tier'], _data: CT['data']) {
+	protected handleTimeoutValue<CT extends DateCacheTiers[number]>(_key: string, tier: CT['tier'], _data: CT['data']) {
 		return this.handleTierDefaultTimeout(tier);
 	}
 

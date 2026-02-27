@@ -1,5 +1,5 @@
+import type {CacheEventsMap, IAsyncCache} from '@luolapeikko/cache-types';
 import {EventEmitter} from 'events';
-import {type CacheEventsMap, type IAsyncCache} from '@luolapeikko/cache-types';
 
 function makeAsyncIterable<T>(iterable: IterableIterator<T>): AsyncIterableIterator<T> {
 	const asyncIterator = {
@@ -32,7 +32,7 @@ export class TestAsync<Payload, Key = string> extends EventEmitter<CacheEventsMa
 	private readonly cacheTtl = new Map<Key, number | undefined>();
 	private defaultExpireMs: undefined | number;
 
-	constructor(defaultExpireMs?: number) {
+	public constructor(defaultExpireMs?: number) {
 		super();
 		this.defaultExpireMs = defaultExpireMs;
 	}
@@ -45,7 +45,7 @@ export class TestAsync<Payload, Key = string> extends EventEmitter<CacheEventsMa
 		return Promise.resolve();
 	}
 
-	public async get(key: Key) {
+	public get(key: Key) {
 		this.emit('get', key);
 		this.cleanExpired();
 		return Promise.resolve(this.cache.get(key));
@@ -97,7 +97,7 @@ export class TestAsync<Payload, Key = string> extends EventEmitter<CacheEventsMa
 	}
 
 	private cleanExpired() {
-		const now = new Date().getTime();
+		const now = Date.now();
 		const deleteEntries = new Map<Key, Payload>();
 		for (const [key, expire] of this.cacheTtl.entries()) {
 			if (expire !== undefined && expire < now) {

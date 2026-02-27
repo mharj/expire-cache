@@ -1,7 +1,7 @@
-import {EventEmitter} from 'events';
 import {type ILoggerLike, LogLevel, type LogMapInfer, MapLogger} from '@avanio/logger-like';
-import {type CacheEventsMap, type ICacheWithEvents} from '@luolapeikko/cache-types';
-import {type ExpireCacheLogMapType} from './ExpireCache.mjs';
+import type {CacheEventsMap, ICacheWithEvents} from '@luolapeikko/cache-types';
+import {EventEmitter} from 'events';
+import type {ExpireCacheLogMapType} from './ExpireCache.mjs';
 
 /**
  * The default log mapping for the ExpireCache class.
@@ -48,7 +48,7 @@ export class ExpireTimeoutCache<Payload, Key = string> extends EventEmitter<Cach
 	 * @param {Partial<ExpireTimeoutCacheLogMapType>} logMapping - The log mapping to use (optional). Default is all logging disabled
 	 * @param {number} defaultExpireMs - The default expiration time in milliseconds (optional)
 	 */
-	constructor(logger?: ILoggerLike, logMapping?: Partial<ExpireTimeoutCacheLogMapType>, defaultExpireMs?: number) {
+	public constructor(logger?: ILoggerLike, logMapping?: Partial<ExpireTimeoutCacheLogMapType>, defaultExpireMs?: number) {
 		super();
 		this.logger = new MapLogger<ExpireTimeoutCacheLogMapType>(logger, Object.assign({}, defaultLogMap, logMapping));
 		this.logger.logKey('constructor', `ExpireTimeoutCache created, defaultExpireMs: ${String(defaultExpireMs)}`);
@@ -93,7 +93,7 @@ export class ExpireTimeoutCache<Payload, Key = string> extends EventEmitter<Cach
 
 	public clear() {
 		this.logger.logKey('clear', `ExpireTimeoutCache clear`);
-		this.cacheTimeout.forEach((_value, key) => this.clearTimeout(key));
+		this.cacheTimeout.forEach((_value, key) => void this.clearTimeout(key));
 		const copy = new Map<Key, Payload>(this.cache);
 		this.notifyExpires(copy);
 		this.emit('clear', copy);
@@ -153,6 +153,6 @@ export class ExpireTimeoutCache<Payload, Key = string> extends EventEmitter<Cach
 	private handleTimeoutSetup(key: Key, expiresDate: Date | undefined): TimeoutObjectType & {expiresInMs: number | undefined} {
 		const expiresInMs = expiresDate && expiresDate.getTime() - Date.now();
 		const timeout = expiresInMs !== undefined ? setTimeout(() => this.handleExpiredCallback(key), expiresInMs) : undefined;
-		return {expiresInMs, timeout, expires: expiresDate};
+		return {expires: expiresDate, expiresInMs, timeout};
 	}
 }

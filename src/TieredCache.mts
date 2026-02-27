@@ -1,6 +1,6 @@
-import {EventEmitter} from 'events';
 import {type ILoggerLike, LogLevel, type LogMapInfer, MapLogger} from '@avanio/logger-like';
-import {type ExpireCacheLogMapType} from './ExpireCache.mjs';
+import {EventEmitter} from 'events';
+import type {ExpireCacheLogMapType} from './ExpireCache.mjs';
 
 export type TierType<Data, Tier extends string> = {tier: Tier; data: Data};
 
@@ -54,7 +54,7 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 	private readonly cacheTimeout = new Map<Key, ReturnType<typeof setTimeout> | undefined>();
 	public readonly logger: MapLogger<TieredCacheLogMapType>;
 	private statusData: Readonly<TieredCacheStatus<Tiers>>;
-	constructor(logger?: ILoggerLike, logMapping?: Partial<ExpireCacheLogMapType>) {
+	public constructor(logger?: ILoggerLike, logMapping?: Partial<ExpireCacheLogMapType>) {
 		super();
 		this.logger = new MapLogger<TieredCacheLogMapType>(logger, Object.assign({}, defaultLogMap, logMapping));
 		this.logCacheName();
@@ -137,9 +137,9 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 					async next() {
 						const {value, done} = iterator.next();
 						if (done) {
-							return {value: undefined, done};
+							return {done, value: undefined};
 						}
-						return {value: await currentTierResolve(value[0], tier, value[1]), done};
+						return {done, value: await currentTierResolve(value[0], tier, value[1])};
 					},
 				};
 			},
@@ -160,9 +160,9 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 					async next() {
 						const {value, done} = iterator.next();
 						if (done) {
-							return {value, done: true};
+							return {done: true, value};
 						}
-						return {value: [value[0], await currentTierResolve(value[0], tier, value[1])], done: false};
+						return {done: false, value: [value[0], await currentTierResolve(value[0], tier, value[1])]};
 					},
 				};
 			},
@@ -246,7 +246,7 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 	 * @param {TimeoutEnum} [timeout] - timeout value, optional
 	 */
 	protected async handleSetValue<T extends Tiers[number]>(key: Key, tier: T['tier'], data: T['data'], timeout?: TimeoutEnum) {
-		this.cache.set(key, {tier, data});
+		this.cache.set(key, {data, tier});
 		this.setTimeout(key, timeout ?? (await this.handleTimeoutValue(key, tier, data)));
 	}
 

@@ -1,6 +1,6 @@
-import {EventEmitter} from 'events';
 import {type ILoggerLike, LogLevel, type LogMapInfer, MapLogger} from '@avanio/logger-like';
-import {type CacheEventsMap, type ICacheWithEvents} from '@luolapeikko/cache-types';
+import type {CacheEventsMap, ICacheWithEvents} from '@luolapeikko/cache-types';
+import {EventEmitter} from 'events';
 
 /**
  * The default log mapping for the ExpireCache class.
@@ -46,7 +46,7 @@ export class ExpireCache<Payload, Key = string> extends EventEmitter<CacheEvents
 	 * @param {Partial<ExpireCacheLogMapType>} logMapping - The log mapping to use (optional). Default is all logging disabled
 	 * @param {number} defaultExpireMs - The default expiration time in milliseconds (optional)
 	 */
-	constructor(logger?: ILoggerLike, logMapping?: Partial<ExpireCacheLogMapType>, defaultExpireMs?: number) {
+	public constructor(logger?: ILoggerLike, logMapping?: Partial<ExpireCacheLogMapType>, defaultExpireMs?: number) {
 		super();
 		this.logger = new MapLogger<ExpireCacheLogMapType>(logger, Object.assign({}, defaultLogMap, logMapping));
 		this.logger.logKey('constructor', `ExpireCache created, defaultExpireMs: ${String(defaultExpireMs)}`);
@@ -133,7 +133,7 @@ export class ExpireCache<Payload, Key = string> extends EventEmitter<CacheEvents
 	 * Cleans expired cache entries
 	 */
 	private cleanExpired() {
-		const now = new Date().getTime();
+		const now = Date.now();
 		const deleteEntries = new Map<Key, Payload>();
 		for (const [key, expire] of this.cacheTtl.entries()) {
 			if (expire !== undefined && expire < now) {
