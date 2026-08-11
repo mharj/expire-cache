@@ -1,4 +1,4 @@
-import {type ILoggerLike, LogLevel} from '@avanio/logger-like';
+import type {ILoggerLike} from '@luolapeikko/logger-type';
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import {type ExpireCacheLogMapType, ExpireTimeoutCache} from '../src/index.mjs';
 import {iterAsArray} from './lib/iter.mjs';
@@ -20,16 +20,16 @@ const spyLogger: ILoggerLike = {
 };
 
 const logLevelMap: ExpireCacheLogMapType = {
-	cleanExpired: LogLevel.Trace,
-	clear: LogLevel.Trace,
-	constructor: LogLevel.Trace,
-	delete: LogLevel.Trace,
-	expires: LogLevel.Trace,
-	get: LogLevel.Trace,
-	has: LogLevel.Trace,
-	onExpire: LogLevel.None,
-	set: LogLevel.Trace,
-	size: LogLevel.Trace,
+	cleanExpired: 'trace',
+	clear: 'trace',
+	constructor: 'trace',
+	delete: 'trace',
+	expires: 'trace',
+	get: 'trace',
+	has: 'trace',
+	onExpire: 'none',
+	set: 'trace',
+	size: 'trace',
 };
 
 let cache: ExpireTimeoutCache<string>;

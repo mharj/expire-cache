@@ -1,7 +1,8 @@
-import {type ILoggerLike, LogLevel, type LogMapInfer, MapLogger} from '@avanio/logger-like';
 import type {CacheEventsMap, ICacheWithEvents} from '@luolapeikko/cache-types';
+import {KeyLogger, type KeyLoggerMapInfer} from '@luolapeikko/key-logger';
+import type {ILoggerLike} from '@luolapeikko/logger-type';
+import type {LogLevelType} from '@luolapeikko/loglevel-type';
 import {EventEmitter} from 'events';
-import type {ExpireCacheLogMapType} from './ExpireCache.mjs';
 
 /**
  * The default log mapping for the ExpireCache class.
@@ -15,19 +16,19 @@ import type {ExpireCacheLogMapType} from './ExpireCache.mjs';
  * });
  */
 const defaultLogMap = {
-	cleanExpired: LogLevel.None,
-	clear: LogLevel.None,
-	constructor: LogLevel.None,
-	delete: LogLevel.None,
-	expires: LogLevel.None,
-	get: LogLevel.None,
-	has: LogLevel.None,
-	onExpire: LogLevel.None,
-	set: LogLevel.None,
-	size: LogLevel.None,
-} satisfies ExpireCacheLogMapType;
+	cleanExpired: 'none',
+	clear: 'none',
+	constructor: 'none',
+	delete: 'none',
+	expires: 'none',
+	get: 'none',
+	has: 'none',
+	onExpire: 'none',
+	set: 'none',
+	size: 'none',
+} as const satisfies Record<string, LogLevelType>;
 
-export type ExpireTimeoutCacheLogMapType = LogMapInfer<typeof defaultLogMap>;
+export type ExpireTimeoutCacheLogMapType = KeyLoggerMapInfer<typeof defaultLogMap>;
 
 type TimeoutObjectType = {timeout: ReturnType<typeof setTimeout> | undefined; expires: Date | undefined};
 
@@ -40,7 +41,7 @@ type TimeoutObjectType = {timeout: ReturnType<typeof setTimeout> | undefined; ex
 export class ExpireTimeoutCache<Payload, Key = string> extends EventEmitter<CacheEventsMap<Payload, Key>> implements ICacheWithEvents<Payload, Key> {
 	private readonly cache = new Map<Key, Payload>();
 	private readonly cacheTimeout = new Map<Key, TimeoutObjectType>();
-	public readonly logger: MapLogger<ExpireTimeoutCacheLogMapType>;
+	public readonly logger: KeyLogger<ExpireTimeoutCacheLogMapType>;
 	private defaultExpireMs: undefined | number;
 	/**
 	 * Creates a new instance of the ExpireTimeoutCache class
@@ -50,8 +51,8 @@ export class ExpireTimeoutCache<Payload, Key = string> extends EventEmitter<Cach
 	 */
 	public constructor(logger?: ILoggerLike, logMapping?: Partial<ExpireTimeoutCacheLogMapType>, defaultExpireMs?: number) {
 		super();
-		this.logger = new MapLogger<ExpireTimeoutCacheLogMapType>(logger, Object.assign({}, defaultLogMap, logMapping));
-		this.logger.logKey('constructor', `ExpireTimeoutCache created, defaultExpireMs: ${String(defaultExpireMs)}`);
+		this.logger = new KeyLogger<ExpireTimeoutCacheLogMapType>(Object.assign({}, defaultLogMap, logMapping), logger);
+		this.logger.key('constructor', `ExpireTimeoutCache created, defaultExpireMs: ${String(defaultExpireMs)}`);
 		this.defaultExpireMs = defaultExpireMs;
 	}
 
@@ -59,29 +60,29 @@ export class ExpireTimeoutCache<Payload, Key = string> extends EventEmitter<Cach
 		this.clearTimeout(key);
 		const {expiresInMs, ...options} = this.handleTimeoutSetup(key, this.getExpireDate(expires));
 		const expireString = expiresInMs ? `${expiresInMs.toString()} ms` : 'undefined';
-		this.logger.logKey('set', `ExpireTimeoutCache set key: ${String(key)}, expireTs: ${expireString}`);
+		this.logger.key('set', `ExpireTimeoutCache set key: ${String(key)}, expireTs: ${expireString}`);
 		this.cache.set(key, data);
 		this.cacheTimeout.set(key, options);
 	}
 
 	public get(key: Key) {
-		this.logger.logKey('get', `ExpireTimeoutCache get key: ${String(key)}`);
+		this.logger.key('get', `ExpireTimeoutCache get key: ${String(key)}`);
 		this.emit('get', key);
 		return this.cache.get(key);
 	}
 
 	public has(key: Key) {
-		this.logger.logKey('has', `ExpireTimeoutCache has key: ${String(key)}`);
+		this.logger.key('has', `ExpireTimeoutCache has key: ${String(key)}`);
 		return this.cache.has(key);
 	}
 
 	public expires(key: Key): Date | undefined {
-		this.logger.logKey('expires', `ExpireTimeoutCache get expire for key: ${String(key)}`);
+		this.logger.key('expires', `ExpireTimeoutCache get expire for key: ${String(key)}`);
 		return this.cacheTimeout.get(key)?.expires;
 	}
 
 	public delete(key: Key) {
-		this.logger.logKey('delete', `ExpireTimeoutCache delete key: ${String(key)}`);
+		this.logger.key('delete', `ExpireTimeoutCache delete key: ${String(key)}`);
 		this.clearTimeout(key);
 		const entry = this.cache.get(key);
 		if (entry) {
@@ -92,7 +93,7 @@ export class ExpireTimeoutCache<Payload, Key = string> extends EventEmitter<Cach
 	}
 
 	public clear() {
-		this.logger.logKey('clear', `ExpireTimeoutCache clear`);
+		this.logger.key('clear', `ExpireTimeoutCache clear`);
 		this.cacheTimeout.forEach((_value, key) => void this.clearTimeout(key));
 		const copy = new Map<Key, Payload>(this.cache);
 		this.notifyExpires(copy);
@@ -102,7 +103,7 @@ export class ExpireTimeoutCache<Payload, Key = string> extends EventEmitter<Cach
 	}
 
 	public size() {
-		this.logger.logKey('size', `ExpireTimeoutCache size: ${this.cache.size.toString()}`);
+		this.logger.key('size', `ExpireTimeoutCache size: ${this.cache.size.toString()}`);
 		return this.cache.size;
 	}
 
@@ -146,7 +147,7 @@ export class ExpireTimeoutCache<Payload, Key = string> extends EventEmitter<Cach
 	}
 
 	private handleExpiredCallback(key: Key) {
-		this.logger.logKey('onExpire', `ExpireTimeoutCache onExpire key: ${String(key)}`);
+		this.logger.key('onExpire', `ExpireTimeoutCache onExpire key: ${String(key)}`);
 		this.delete(key);
 	}
 

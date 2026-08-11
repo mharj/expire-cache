@@ -7,12 +7,9 @@ export default defineConfig({
 		coverage: {
 			include: ['src/**/*.mts'],
 			provider: 'v8',
-			reporter: ['text', 'lcov'],
+			reporter: ['text', 'lcovonly'],
 		},
 		include: ['test/**/*.test.mts', 'test/**/*.cjs', 'test/**/*.mjs'],
-		outputFile: {
-			junit: './reports/jest-results.xml',
-		},
-		reporters: process.env.GITHUB_ACTIONS ? ['github-actions', 'junit'] : ['verbose', 'github-actions', 'junit'],
+		reporters: ['minimal', 'github-actions'],
 	},
 });

@@ -97,7 +97,7 @@
         "useValidTypeof": "error",
         "useYield": "error"
       },
-      "recommended": true,
+      "preset": "recommended",
       "style": {
         "noCommonJs": "error",
         "noInferrableTypes": "error",

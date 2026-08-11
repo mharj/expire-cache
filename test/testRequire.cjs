@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-const {ExpireCache, ExpireTimeoutCache} = require('../dist/index.js');
+const {ExpireCache, ExpireTimeoutCache} = require('../dist/index.cjs');
 
 describe('CJS require loading', function () {
 	it('should have the ExpireCache class', function () {

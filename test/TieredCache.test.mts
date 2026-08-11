@@ -1,4 +1,4 @@
-import {type ILoggerLike, LogLevel} from '@avanio/logger-like';
+import type {ILoggerLike} from '@luolapeikko/logger-type';
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import type {TieredCacheLogMapType} from '../src/index.mjs';
 import {DateTieredCache, DateTimeout} from './mockup/DateTieredCache.mjs';
@@ -20,16 +20,16 @@ const spyLogger: ILoggerLike = {
 };
 
 const logLevelMap: TieredCacheLogMapType = {
-	clear: LogLevel.Trace,
-	clearTimeoutKey: LogLevel.Trace,
-	constructor: LogLevel.Trace,
-	delete: LogLevel.Trace,
-	get: LogLevel.None,
-	has: LogLevel.Trace,
-	runTimeout: LogLevel.Trace,
-	set: LogLevel.None,
-	setTimeout: LogLevel.Trace,
-	size: LogLevel.Trace,
+	clear: 'trace',
+	clearTimeoutKey: 'trace',
+	constructor: 'trace',
+	delete: 'trace',
+	get: 'none',
+	has: 'trace',
+	runTimeout: 'trace',
+	set: 'none',
+	setTimeout: 'trace',
+	size: 'trace',
 };
 
 function sleep(ms: number) {

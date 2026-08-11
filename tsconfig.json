@@ -15,13 +15,13 @@
     "noUnusedLocals": true,
     "outDir": "./dist",
     "removeComments": false,
-    "rootDir": "./src",
+    "rootDir": ".",
     "sourceRoot": "./src",
     "strict": true,
     "strictNullChecks": true,
     "target": "es2017",
     "types": ["node"]
   },
-  "exclude": ["node_modules", "**/*.spec.ts", "test", "dist"],
-  "include": ["src"]
+  "exclude": ["node_modules", "dist"],
+  "include": ["src", "test"]
 }

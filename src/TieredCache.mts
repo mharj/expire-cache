@@ -1,4 +1,6 @@
-import {type ILoggerLike, LogLevel, type LogMapInfer, MapLogger} from '@avanio/logger-like';
+import {KeyLogger, type KeyLoggerMapInfer} from '@luolapeikko/key-logger';
+import type {ILoggerLike} from '@luolapeikko/logger-type';
+import type {LogLevelType} from '@luolapeikko/loglevel-type';
 import {EventEmitter} from 'events';
 import type {ExpireCacheLogMapType} from './ExpireCache.mjs';
 
@@ -28,19 +30,19 @@ type MultiTierCacheEvents<T extends TierType<unknown, string>[], Key> = {
 };
 
 const defaultLogMap = {
-	clear: LogLevel.None,
-	clearTimeoutKey: LogLevel.None,
-	constructor: LogLevel.None,
-	delete: LogLevel.None,
-	get: LogLevel.None,
-	has: LogLevel.None,
-	runTimeout: LogLevel.None,
-	set: LogLevel.None,
-	setTimeout: LogLevel.None,
-	size: LogLevel.None,
-} as const;
+	clear: 'none',
+	clearTimeoutKey: 'none',
+	constructor: 'none',
+	delete: 'none',
+	get: 'none',
+	has: 'none',
+	runTimeout: 'none',
+	set: 'none',
+	setTimeout: 'none',
+	size: 'none',
+} as const satisfies Record<string, LogLevelType>;
 
-export type TieredCacheLogMapType = LogMapInfer<typeof defaultLogMap>;
+export type TieredCacheLogMapType = KeyLoggerMapInfer<typeof defaultLogMap>;
 
 /**
  * Multi tier cache with timeout support to change tier based on timeout
@@ -52,11 +54,11 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 	public abstract readonly cacheName: string;
 	protected readonly cache = new Map<Key, Tiers[number]>();
 	private readonly cacheTimeout = new Map<Key, ReturnType<typeof setTimeout> | undefined>();
-	public readonly logger: MapLogger<TieredCacheLogMapType>;
+	public readonly logger: KeyLogger<TieredCacheLogMapType>;
 	private statusData: Readonly<TieredCacheStatus<Tiers>>;
 	public constructor(logger?: ILoggerLike, logMapping?: Partial<ExpireCacheLogMapType>) {
 		super();
-		this.logger = new MapLogger<TieredCacheLogMapType>(logger, Object.assign({}, defaultLogMap, logMapping));
+		this.logger = new KeyLogger<TieredCacheLogMapType>(Object.assign({}, defaultLogMap, logMapping), logger);
 		this.logCacheName();
 		this.handleCacheEntry = this.handleCacheEntry.bind(this);
 		this.statusData = {size: 0, tiers: {...this.getInitialStatusData()}};
@@ -70,7 +72,7 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 	 * @returns - promise that resolves when cache entry is set
 	 */
 	public async get<T extends Tiers[number]>(key: Key, tier: T['tier'], timeout?: TimeoutEnum): Promise<T['data'] | undefined> {
-		this.logger.logKey('get', `MultiTierCache ${this.cacheName} get: '${String(key)}' tier: ${tier}`);
+		this.logger.key('get', `MultiTierCache ${this.cacheName} get: '${String(key)}' tier: ${tier}`);
 		const entry = this.cache.get(key);
 		const value = await this.handleCacheEntry(key, tier, entry);
 		// if we found entry, let's extend timeout
@@ -88,7 +90,7 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 	 * @param {TimeoutEnum} [timeout] - optional timeout for cache entry. Else timeout will be checked from handleTimeoutValue or default timeout for tier.
 	 */
 	public async set<T extends Tiers[number]>(key: Key, tier: T['tier'], data: T['data'], timeout?: TimeoutEnum): Promise<void> {
-		this.logger.logKey('set', `MultiTierCache ${this.cacheName} set: '${String(key)}' tier: ${tier}`);
+		this.logger.key('set', `MultiTierCache ${this.cacheName} set: '${String(key)}' tier: ${tier}`);
 		await this.handleSetValue(key, tier, data, timeout);
 		this.emit('set', [key]);
 		this.emit('update', this.buildStatus(true));
@@ -102,7 +104,7 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 	 */
 	public async setEntries<T extends Tiers[number]>(tier: T['tier'], entries: Iterable<[Key, T['data']]>, timeout?: TimeoutEnum): Promise<void> {
 		const entriesArray = Array.from(entries);
-		this.logger.logKey('set', `MultiTierCache ${this.cacheName} setEntries (count: ${entriesArray.length.toString()}) tier: ${tier}`);
+		this.logger.key('set', `MultiTierCache ${this.cacheName} setEntries (count: ${entriesArray.length.toString()}) tier: ${tier}`);
 		for (const [key, data] of entriesArray) {
 			await this.handleSetValue(key, tier, data, timeout);
 		}
@@ -174,12 +176,12 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 	}
 
 	public has(key: Key) {
-		this.logger.logKey('has', `MultiTierCache ${this.cacheName} has: '${String(key)}'`);
+		this.logger.key('has', `MultiTierCache ${this.cacheName} has: '${String(key)}'`);
 		return this.cache.has(key);
 	}
 
 	public size() {
-		this.logger.logKey('size', `MultiTierCache ${this.cacheName} size: ${this.cache.size.toString()}`);
+		this.logger.key('size', `MultiTierCache ${this.cacheName} size: ${this.cache.size.toString()}`);
 		return this.cache.size;
 	}
 
@@ -187,7 +189,7 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 		const keys = new Set(this.cache.keys());
 		this.clearAllTimeouts();
 		this.cache.clear();
-		this.logger.logKey('clear', `MultiTierCache ${this.cacheName} clear`);
+		this.logger.key('clear', `MultiTierCache ${this.cacheName} clear`);
 		this.emit('delete', keys);
 		this.emit('clear');
 		this.emit('update', this.buildStatus(true));
@@ -196,7 +198,7 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 	public delete(key: Key): boolean {
 		const isDeleted = this.handleDeleteValue(key);
 		if (isDeleted) {
-			this.logger.logKey('delete', `MultiTierCache ${this.cacheName} delete: '${String(key)}'`);
+			this.logger.key('delete', `MultiTierCache ${this.cacheName} delete: '${String(key)}'`);
 			this.emit('delete', [key]);
 			this.emit('update', this.buildStatus(true));
 		}
@@ -211,7 +213,7 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 				deleteKeys.push(key);
 			}
 		}
-		this.logger.logKey('delete', `MultiTierCache ${this.cacheName} deleteKeys (count: ${deleteKeys.length.toString()})`);
+		this.logger.key('delete', `MultiTierCache ${this.cacheName} deleteKeys (count: ${deleteKeys.length.toString()})`);
 		this.emit('delete', deleteKeys);
 		this.emit('update', this.buildStatus(true));
 		return deleteKeys.length;
@@ -261,7 +263,7 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 	}
 
 	private logCacheName() {
-		this.logger.logKey('constructor', `MultiTierCache ${this.cacheName} created`);
+		this.logger.key('constructor', `MultiTierCache ${this.cacheName} created`);
 	}
 
 	private setTimeout(key: Key, timeout: number | undefined) {
@@ -274,14 +276,14 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 				key,
 				setTimeout(() => void this.runTimeout(key), timeout),
 			);
-			this.logger.logKey('setTimeout', `MultiTierCache ${this.cacheName} setTimeout: '${String(key)}' = timeouts: ${timeout.toString()}`);
+			this.logger.key('setTimeout', `MultiTierCache ${this.cacheName} setTimeout: '${String(key)}' = timeouts: ${timeout.toString()}`);
 		}
 	}
 
 	private clearTimeoutKey(key: Key) {
 		const oldTimeout = this.cacheTimeout.get(key);
 		if (oldTimeout) {
-			this.logger.logKey('clearTimeoutKey', `MultiTierCache ${this.cacheName} clearTimeoutKey: '${String(key)}'`);
+			this.logger.key('clearTimeoutKey', `MultiTierCache ${this.cacheName} clearTimeoutKey: '${String(key)}'`);
 			clearTimeout(oldTimeout);
 		}
 		this.cacheTimeout.delete(key);
@@ -300,10 +302,10 @@ export abstract class TieredCache<Tiers extends TierType<unknown, string>[], Tim
 		try {
 			const timeoutValue = await this.handleTierTimeout(key);
 			if (timeoutValue === undefined) {
-				this.logger.logKey('runTimeout', `MultiTierCache ${this.cacheName} runTimeout: '${String(key)}' cleared`);
+				this.logger.key('runTimeout', `MultiTierCache ${this.cacheName} runTimeout: '${String(key)}' cleared`);
 				this.clearTimeoutKey(key);
 			} else {
-				this.logger.logKey('runTimeout', `MultiTierCache ${this.cacheName} runTimeout: '${String(key)}' cleared, new timeout: ${timeoutValue.toString()}`);
+				this.logger.key('runTimeout', `MultiTierCache ${this.cacheName} runTimeout: '${String(key)}' cleared, new timeout: ${timeoutValue.toString()}`);
 				this.setTimeout(key, timeoutValue);
 			}
 			this.emit('update', this.buildStatus(true));
